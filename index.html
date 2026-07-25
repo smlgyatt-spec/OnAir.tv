@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnAir.tv Cyber-Tablet HUD</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --bg-dark: #050608;
+      --panel-bg: rgba(13, 16, 25, 0.85);
+      --panel-border: #1a233a;
+      --neon-red: #ff003c;
+      --neon-cyan: #00f0ff;
+      --neon-green: #00ff66;
+      --neon-amber: #ffaa00;
+      --text-main: #e2e8f0;
+      --text-muted: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Share Tech Mono', monospace;
+      user-select: none;
+    }
+
+    body {
+      background-color: #020304;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+      color: var(--text-main);
+      overflow: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+    }
+
+    /* PHYSICAL TABLET SHELL */
+    .tablet {
+      width: 1140px;
+      height: 700px;
+      background: linear-gradient(145deg, #0d111a, #06080d);
+      border-radius: 24px;
+      padding: 14px;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 0 2px #1f293d;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tablet-screen {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+      position: relative;
+    }
+
+    /* HEADER HUD */
+    header {
+      background: rgba(10, 13, 20, 0.95);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 30;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cyber-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      color: #fff;
+      position: relative;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cyber-logo span {
+      color: var(--neon-red);
+      text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+      animation: logoPulse 2s infinite alternate;
+    }
+
+    .logo-badge {
+      font-size: 0.6rem;
+      background: rgba(255, 0, 60, 0.15);
+      border: 1px solid var(--neon-red);
+      color: var(--neon-red);
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+
+    @keyframes logoPulse {
+      0% { text-shadow: 0 0 5px var(--neon-red); }
+      100% { text-shadow: 0 0 18px var(--neon-red), 0 0 30px var(--neon-red); }
+    }
+
+    .audio-vis {
+      display: flex;
+      gap: 3px;
+      align-items: flex-end;
+      height: 16px;
+    }
+    .bar {
+      width: 3px;
+      background: var(--neon-cyan);
+      border-radius: 1px;
+      animation: eqBar 0.8s infinite ease-in-out alternate;
+    }
+    .bar:nth-child(2) { animation-delay: 0.2s; height: 60%; }
+    .bar:nth-child(3) { animation-delay: 0.4s; height: 100%; }
+    .bar:nth-child(4) { animation-delay: 0.1s; height: 40%; }
+    @keyframes eqBar { 0% { height: 20%; } 100% { height: 100%; } }
+
+    .stream-metrics {
+      display: flex;
+      gap: 14px;
+      background: rgba(0,0,0,0.6);
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--panel-border);
+      font-size: 0.72rem;
+    }
+
+    .metric-val { font-weight: bold; color: var(--neon-cyan); }
+
+    .header-actions { display: flex; gap: 8px; }
+
+    .btn {
+      background: #121826;
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+      color: #fff;
+    }
+
+    .btn-red {
+      background: var(--neon-red);
+      color: white;
+      border: none;
+      box-shadow: 0 0 12px rgba(255, 0, 60, 0.5);
+    }
+    .btn-red:hover { background: #e00034; box-shadow: 0 0 20px rgba(255, 0, 60, 0.8); }
+
+    /* LAYOUT & VIDEO DASHBOARD */
+    .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+    .video-dashboard {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      padding: 10px;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .main-viewport {
+      flex: 1;
+      background: #030406;
+      border-radius: 8px;
+      position: relative;
+      border: 1px solid var(--panel-border);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-viewport::before {
+      content: '';
+      position: absolute;
+      top: 10px; left: 10px; width: 20px; height: 20px;
+      border-top: 2px solid var(--neon-cyan);
+      border-left: 2px solid var(--neon-cyan);
+      z-index: 12;
+      pointer-events: none;
+    }
+    .main-viewport::after {
+      content: '';
+      position: absolute;
+      bottom: 10px; right: 10px; width: 20px; height: 20px;
+      border-bottom: 2px solid var(--neon-cyan);
+      border-right: 2px solid var(--neon-cyan);
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    video.cam-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: filter 0.3s;
+    }
+
+    video.night-vision {
+      filter: sepia(1) hue-rotate(80deg) saturate(5) contrast(1.4) brightness(0.9);
+    }
+
+    .scanlines {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+      background-size: 100% 4px;
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .cam-controls-overlay {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      display: flex;
+      gap: 6px;
+      z-index: 15;
+    }
+
+    .fx-btn {
+      background: rgba(10, 13, 20, 0.85);
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      border-radius: 3px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+    .fx-btn.active {
+      border-color: var(--neon-green);
+      color: var(--neon-green);
+      box-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
+    }
+
+    .cam-overlay {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(10, 13, 20, 0.9);
+      border-left: 3px solid var(--neon-red);
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      z-index: 15;
+      letter-spacing: 1px;
+      backdrop-filter: blur(6px);
+    }
+
+    .hud-widgets {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      gap: 8px;
+      z-index: 15;
+    }
+
+    .hud-badge {
+      background: rgba(10, 13, 20, 0.9);
+      border: 1px solid var(--panel-border);
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rec-dot {
+      width: 8px; height: 8px;
+      background: var(--neon-red);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--neon-red);
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    .cam-grid {
+      height: 90px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .cam-card {
+      min-width: 135px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px;
+      transition: all 0.2s;
+    }
+
+    .cam-card:hover { border-color: var(--neon-cyan); }
+
+    .cam-card.active {
+      border: 1px solid var(--neon-red);
+      background: rgba(255, 0, 60, 0.08);
+      box-shadow: inset 0 0 15px rgba(255, 0, 60, 0.15);
+    }
+
+    .cam-card-title { font-size: 0.7rem; font-weight: bold; color: #fff; }
+    .cam-card-status { font-size: 0.62rem; color: var(--neon-green); }
+
+    /* CHAT PANEL */
+    .chat-section {
+      width: 310px;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-section.hidden { display: none; }
+
+    .chat-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--panel-border);
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg { 
+      font-size: 0.78rem; 
+      background: rgba(0,0,0,0.4);
+      padding: 6px 8px;
+      border-radius: 4px;
+      border-left: 2px solid var(--panel-border);
+    }
+    .msg-user { font-weight: bold; margin-right: 4px; }
+
+    .chat-input-area {
+      padding: 8px;
+      border-top: 1px solid var(--panel-border);
+      display: flex;
+      gap: 6px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg-dark);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 6px 10px;
+      color: #fff;
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal {
+      background: #0d111a;
+      border: 1px solid var(--neon-cyan);
+      border-radius: 10px;
+      padding: 20px;
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+    }
+
+    .modal input[type="text"] {
+      background: var(--bg-dark);
+      border: 1px solid var(--panel-border);
+      color: #fff;
+      padding: 8px;
+      border-radius: 4px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tablet">
+    <div class="tablet-screen">
+      
+      <header>
+        <div class="logo-box">
+          <div class="cyber-logo">ON<span>AIR</span>.TV <span class="logo-badge">[LIVE_OS]</span></div>
+          <div class="audio-vis">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+        </div>
+
+        <div class="stream-metrics">
+          <div>UPTIME: <span class="metric-val" id="uptimeCounter">00:00:00</span></div>
+          <div>SIGNAL: <span class="metric-val" style="color: var(--neon-green)">100%</span></div>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn" onclick="openCamModal()">+ Connect Cam</button>
+          <button class="btn btn-red" onclick="toggleChatToggle()" id="chatToggleBtn">Hide Chat</button>
+        </div>
+      </header>
+
+      <div class="app-body">
+        
+        <div class="video-dashboard">
+          
+          <div class="main-viewport" id="viewportContainer">
+            <div class="scanlines" id="scanlinesOverlay"></div>
+            <div class="cam-overlay" id="activeCamName">NO FEED SELECTED</div>
+            
+            <div class="hud-widgets">
+              <div class="hud-badge"><div class="rec-dot"></div> LIVE STREAM</div>
+            </div>
+
+            <div class="cam-controls-overlay">
+              <button class="fx-btn" id="nvBtn" onclick="toggleNightVision()">[NV] Night Vision</button>
+              <button class="fx-btn active" id="crtBtn" onclick="toggleCRT()">[CRT] Scanlines</button>
+            </div>
+
+            <div id="fallbackDisplay" style="color: var(--text-muted);">
+              [ CONNECT A CAMERA TO INITIATE STREAM ]
+            </div>
+          </div>
+
+          <div class="cam-grid" id="camGrid"></div>
+
+        </div>
+
+        <div class="chat-section" id="chatContainer">
+          <div class="chat-header">
+            <span>STREAM CHAT</span>
+            <span style="color: var(--neon-green)">● 28,401</span>
+          </div>
+
+          <div class="chat-messages" id="chatBox"></div>
+
+          <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Type chat message..." onkeydown="if(event.key==='Enter') sendChat()">
+            <button class="btn btn-red" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="camModal">
+    <div class="modal">
+      <h3 style="color: #fff; font-family: 'Orbitron', sans-serif;">CONNECT FEED</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 0.7rem; color: var(--text-muted);">CAMERA NAME OR FILE</label>
+        <input type="text" id="camNameInput" placeholder="e.g. Hallway, Hallway.avi, Basement.mov">
+        <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">
+          * Supports <b>.avi</b>, <b>.mp4</b>, <b>.mov</b>, <b>.mkv</b>, and <b>.webm</b>.
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 0.7rem; color: var(--text-muted);">OR CHOOSE LOCAL FILE DIRECTLY</label>
+        <input type="file" id="camFileInput" accept="video/*,.avi,.mp4,.mov,.mkv,.webm" style="color: var(--text-muted); font-size: 0.75rem;">
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;">
+        <button class="btn" onclick="closeCamModal()">Cancel</button>
+        <button class="btn btn-red" onclick="addCamera()">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cameras = [];
+    let activeCamId = null;
+    let chatEnabled = true;
+    let nightVisionActive = false;
+
+    const SUPPORTED_EXTENSIONS = ['.mp4', '.avi', '.mov', '.mkv', '.webm', '.m4v'];
+
+    const camGrid = document.getElementById('camGrid');
+    const viewportContainer = document.getElementById('viewportContainer');
+    const activeCamName = document.getElementById('activeCamName');
+    const chatBox = document.getElementById('chatBox');
+
+    function renderCams() {
+      camGrid.innerHTML = '';
+      cameras.forEach(cam => {
+        const card = document.createElement('div');
+        card.className = `cam-card ${cam.id === activeCamId ? 'active' : ''}`;
+        card.onclick = () => switchCam(cam.id);
+        card.innerHTML = `
+          <div class="cam-card-title">${cam.name.toUpperCase()}</div>
+          <div class="cam-card-status">● LIVE FEED</div>
+        `;
+        camGrid.appendChild(card);
+      });
+    }
+
+    function switchCam(id) {
+      activeCamId = id;
+      const selected = cameras.find(c => c.id === id);
+      activeCamName.textContent = selected.name.toUpperCase();
+
+      const oldVideo = document.getElementById('activeVideoFeed');
+      if (oldVideo) oldVideo.remove();
+      const oldFallback = document.getElementById('fallbackDisplay');
+      if (oldFallback) oldFallback.remove();
+
+      const video = document.createElement('video');
+      video.className = `cam-feed ${nightVisionActive ? 'night-vision' : ''}`;
+      video.id = 'activeVideoFeed';
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+
+      if (Array.isArray(selected.sources)) {
+        let currentExtIndex = 0;
+
+        function tryNextSource() {
+          if (currentExtIndex < selected.sources.length) {
+            video.src = selected.sources[currentExtIndex];
+            currentExtIndex++;
+          } else {
+            showError(`[ ERROR: COULD NOT LOAD "${selected.name.toUpperCase()}" ]`);
+          }
+        }
+
+        video.onerror = () => tryNextSource();
+        tryNextSource();
+      } else {
+        video.src = selected.videoSrc;
+        video.onerror = () => showError(`[ ERROR: COULD NOT PLAY FILE FORMAT OR CODEC FOR "${selected.name.toUpperCase()}" ]`);
+      }
+
+      viewportContainer.appendChild(video);
+      renderCams();
+    }
+
+    function showError(msg) {
+      const oldVideo = document.getElementById('activeVideoFeed');
+      if (oldVideo) oldVideo.remove();
+      const oldFallback = document.getElementById('fallbackDisplay');
+      if (oldFallback) oldFallback.remove();
+
+      const fallback = document.createElement('div');
+      fallback.id = 'fallbackDisplay';
+      fallback.style.color = 'var(--neon-red)';
+      fallback.style.textAlign = 'center';
+      fallback.style.padding = '20px';
+      fallback.textContent = msg;
+      viewportContainer.appendChild(fallback);
+    }
+
+    function toggleNightVision() {
+      nightVisionActive = !nightVisionActive;
+      const btn = document.getElementById('nvBtn');
+      const video = document.getElementById('activeVideoFeed');
+      
+      if (nightVisionActive) {
+        btn.classList.add('active');
+        if (video) video.classList.add('night-vision');
+      } else {
+        btn.classList.remove('active');
+        if (video) video.classList.remove('night-vision');
+      }
+    }
+
+    function toggleCRT() {
+      const scanlines = document.getElementById('scanlinesOverlay');
+      const btn = document.getElementById('crtBtn');
+      if (scanlines.style.display === 'none') {
+        scanlines.style.display = 'block';
+        btn.classList.add('active');
+      } else {
+        scanlines.style.display = 'none';
+        btn.classList.remove('active');
+      }
+    }
+
+    function openCamModal() { document.getElementById('camModal').style.display = 'flex'; }
+    function closeCamModal() { 
+      document.getElementById('camModal').style.display = 'none';
+      document.getElementById('camNameInput').value = '';
+      document.getElementById('camFileInput').value = '';
+    }
+
+    function addCamera() {
+      const nameInput = document.getElementById('camNameInput').value.trim();
+      const fileInput = document.getElementById('camFileInput');
+
+      if (!nameInput && (!fileInput.files || !fileInput.files[0])) return;
+
+      const newId = cameras.length + 1;
+      let camName = nameInput || "CAM " + newId;
+      let camData = { id: newId, name: camName };
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        
+        // Attempt object URL first, fallback to FileReader base64 if running locally without server
+        try {
+          camData.videoSrc = URL.createObjectURL(file);
+        } catch(e) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            camData.videoSrc = e.target.result;
+            if (activeCamId === newId) switchCam(newId);
+          };
+          reader.readAsDataURL(file);
+        }
+
+        // Secondary fallback via FileReader if blob fails at runtime
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          camData.videoSrc = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+      } else {
+        const cleanInput = nameInput.toLowerCase().replace(/\s+/g, '_');
+        const hasExtension = SUPPORTED_EXTENSIONS.some(ext => cleanInput.endsWith(ext));
+
+        if (hasExtension) {
+          camData.videoSrc = cleanInput;
+        } else {
+          camData.sources = SUPPORTED_EXTENSIONS.map(ext => cleanInput + ext);
+        }
+      }
+
+      cameras.push(camData);
+      closeCamModal();
+      renderCams();
+      switchCam(newId);
+    }
+
+    function toggleChatToggle() {
+      const chatContainer = document.getElementById('chatContainer');
+      const btn = document.getElementById('chatToggleBtn');
+      chatEnabled = !chatEnabled;
+
+      if (chatEnabled) {
+        chatContainer.classList.remove('hidden');
+        btn.textContent = 'Hide Chat';
+      } else {
+        chatContainer.classList.add('hidden');
+        btn.textContent = 'Show Chat';
+      }
+    }
+
+    const botUsers = ["RCKnSTN", "Gowger", "NatalieSparkles", "CapMoroni", "HanShot2nd"];
+    const botMessages = ["is this stream real?!", "turn on hallway cam!", "DONT GO IN THERE", "why is it glitching?"];
+
+    setInterval(() => {
+      if (!chatEnabled) return;
+      const user = botUsers[Math.floor(Math.random() * botUsers.length)];
+      const msg = botMessages[Math.floor(Math.random() * botMessages.length)];
+      
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'msg';
+      msgDiv.innerHTML = `<span class="msg-user" style="color: var(--neon-cyan)">${user}:</span> ${msg}`;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }, 2000);
+
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      if (input.value.trim() !== '') {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'msg';
+        msgDiv.innerHTML = `<span class="msg-user" style="color: var(--neon-green)">You:</span> ${input.value}`;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        input.value = '';
+      }
+    }
+
+    let sec = 0;
+    setInterval(() => {
+      sec++;
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      document.getElementById('uptimeCounter').textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    openCamModal();
+  </script>
+</body>
+</html>
