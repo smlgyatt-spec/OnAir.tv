@@ -514,7 +514,7 @@
         <div class="chat-section" id="chatContainer">
           <div class="chat-header">
             <span>STREAM CHAT</span>
-            <span style="color: var(--neon-green)">● 28,401</span>
+            <span style="color: var(--neon-green)">● 1,240</span>
           </div>
 
           <div class="chat-messages" id="chatBox"></div>
@@ -537,7 +537,7 @@
       
       <div style="display: flex; flex-direction: column; gap: 4px;">
         <label style="font-size: 0.7rem; color: var(--text-muted);">CAMERA NAME OR FILE</label>
-        <input type="text" id="camNameInput" placeholder="e.g. Hallway, Hallway.avi, Basement.mov">
+        <input type="text" id="camNameInput" placeholder="e.g. Hallway, Hallway.mp4, Basement.webm">
         <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">
           * Supports <b>.mp4</b>, <b>.avi</b>, <b>.mov</b>, <b>.mkv</b>, and <b>.webm</b>.
         </p>
@@ -571,121 +571,26 @@
     const activeCamName = document.getElementById('activeCamName');
     const chatBox = document.getElementById('chatBox');
 
-    // 110 Pre-loaded Stream Chat Messages
-    const initial110Messages = [
-      { user: "RCKnSTN", text: "is this stream real?!" },
-      { user: "Gowger", text: "turn on hallway cam!" },
-      { user: "NatalieSparkles", text: "DONT GO IN THERE" },
-      { user: "CapMoroni", text: "why is it glitching?" },
-      { user: "HanShot2nd", text: "anyone else see that figure movement in the back?" },
-      { user: "Vortex09", text: "W stream quality today" },
-      { user: "AuraHunter", text: "switch to CAM 2 fast!" },
-      { user: "ShadowByte", text: "the static is getting stronger..." },
-      { user: "PixelPulse", text: "yo why is the audio clipping like that?" },
-      { user: "CyberGhost", text: "check the timestamp in the corner!" },
-      { user: "NeonRider", text: "is this live or recorded?" },
-      { user: "VoidWalker", text: "something moved in the shadows bro" },
-      { user: "NullSignal", text: "LMAO chat panicking again" },
-      { user: "DataDrifter", text: "turn on night vision!" },
-      { user: "ByteBandit", text: "this HUD setup goes hard" },
-      { user: "GlitchQueen", text: "did the frame rate just drop??" },
-      { user: "EchoChamber", text: "i hear footsteps in the feed" },
-      { user: "StaticMind", text: "CAM 3 looks totally clear though" },
-      { user: "RetroSpect", text: "who is running this stream?" },
-      { user: "Vector99", text: "press the CRT toggle button" },
-      { user: "PulseCode", text: "28k viewers holy hype" },
-      { user: "ZeroCool", text: "system status looks 100% green" },
-      { user: "PhantomDev", text: "are these .avi files loading fine?" },
-      { user: "CircuitBreaker", text: "bro the night vision filter makes it 10x creepier" },
-      { user: "DarkMode", text: "DONT LOOK BEHIND THE DOOR" },
-      { user: "AlphaTech", text: "uptime on point today" },
-      { user: "OmegaByte", text: "where is the streamer located?" },
-      { user: "KiloWatt", text: "chat slow down i cant read" },
-      { user: "TeraHz", text: "clip that right now!!" },
-      { user: "GigaChad", text: "looks normal to me guys" },
-      { user: "BitSmasher", text: "signal strength is dropping?" },
-      { user: "FluxCapacitor", text: "wait what was that flash on screen?" },
-      { user: "QuantumShift", text: "audio visualizer is spiking hard" },
-      { user: "HyperDrive", text: "we need more camera angles!" },
-      { user: "CyberSamurai", text: "switching feeds..." },
-      { user: "VaporWave", text: "aesthetic is elite" },
-      { user: "SynthDriver", text: "anyone got the VOD link?" },
-      { user: "BinaryStar", text: "stream status: LIVE" },
-      { user: "LogicGate", text: "is the feed looping?" },
-      { user: "Overclock", text: "NV mode active!" },
-      { user: "NetRunner", text: "hacking into the main frame lol" },
-      { user: "DataLink", text: "audio EQ looking clean" },
-      { user: "CodeNinja", text: "check CAM 1 again" },
-      { user: "TechSurfer", text: "the CRT effect is so nostalgic" },
-      { user: "GridLock", text: "signal 100% stable" },
-      { user: "CyberGeek", text: "what codec is this video using?" },
-      { user: "PixelArtisan", text: "frame perfect timing on that transition" },
-      { user: "RayTracer", text: "lighting looks ominous" },
-      { user: "ShaderPro", text: "turn up the brightness please" },
-      { user: "RenderNode", text: "buffer looks fine on my end" },
-      { user: "FPSMaster", text: "smooth 60fps feed" },
-      { user: "LagMonster", text: "my internet is struggling with this HD stream" },
-      { user: "PingKing", text: "0ms latency vibes" },
-      { user: "PacketLoss", text: "did the screen just flicker red?" },
-      { user: "BandwidthBoss", text: "streaming at maximum bit rate" },
-      { user: "CloudRunner", text: "Vercel hosting working great!" },
-      { user: "ServerHost", text: "node status optimal" },
-      { user: "DatabaseGuru", text: "log entry #409 saved" },
-      { user: "QueryMaster", text: "SELECT * FROM cameras WHERE status='LIVE'" },
-      { user: "IndexSeeker", text: "found something in the hallway feed" },
-      { user: "KeyFrame", text: "nice camera placement" },
-      { user: "BitRate", text: "audio quality crisp" },
-      { user: "StreamSniper", text: "i know where this room is!" },
-      { user: "RaidLeader", text: "RAID INCOMING 🎉" },
-      { user: "ModTeam", text: "keep chat civil everyone" },
-      { user: "SubBot", text: "thanks for subscribing @CyberGhost!" },
-      { user: "PrimeMember", text: "used my prime sub on this stream" },
-      { user: "HypeTrain", text: "HYPE TRAIN LEVEL 5 REACHED 🚂" },
-      { user: "EmoteSpammer", text: "ONAIR ONAIR ONAIR" },
-      { user: "ChatLurker", text: "first time chatting hi" },
-      { user: "NightOwl", text: "it's 3 AM why am i watching this" },
-      { user: "Insomniac", text: "cant sleep feed is too addicting" },
-      { user: "CoffeeAddict", text: "brb grabbing coffee don't miss anything" },
-      { user: "PopcornTime", text: "this plot is getting wild" },
-      { user: "MovieBuff", text: "feels like a found footage horror film" },
-      { user: "ThrillerFan", text: "gives me Doctor Sleep vibes" },
-      { user: "HorrorSeeker", text: "Evil Dead Rise energy right here" },
-      { user: "SpookyVibes", text: "monitors flickering again..." },
-      { user: "GhostHunter", text: "EMF meter would be off the charts" },
-      { user: "ParanormalTech", text: "scanning frequency band..." },
-      { user: "EntityX", text: "I SEE YOU" },
-      { user: "AnomalousData", text: "reading anomalous signature in sector 4" },
-      { user: "GlitchArt", text: "the corruption pattern looks cool though" },
-      { user: "BugHunter", text: "found a missing keyframe at 00:04:12" },
-      { user: "DevOps", text: "deploy script executed successfully" },
-      { user: "FrontendFan", text: "love this custom HUD layout" },
-      { user: "CSSWizard", text: "the neon glowing borders are slick" },
-      { user: "JSNinja", text: "clean vanilla JS implementation" },
-      { user: "WebAssembly", text: "ogv.js fallback engaged" },
-      { user: "HTML5Viewer", text: "native video element rendering" },
-      { user: "MediaSource", text: "buffering segment #12..." },
-      { user: "BlobURL", text: "object URL resolved" },
-      { user: "FileReader", text: "DataURL fallback ready" },
-      { user: "CORSGuard", text: "origin policy passed" },
-      { user: "HTTPSecure", text: "connection encrypted" },
-      { user: "TLSHandshake", text: "session established" },
-      { user: "SocketIO", text: "realtime socket connected" },
-      { user: "WebRTC", text: "peer-to-peer audio link clear" },
-      { user: "UptimeRobot", text: "system health: 99.9%" },
-      { user: "CPUStatus", text: "core usage at 14%" },
-      { user: "RAMUsage", text: "memory allocation stable" },
-      { user: "DiskSpace", text: "recording buffer 82% free" },
-      { user: "ThermalCheck", text: "temp nominal" },
-      { user: "FanSpeed", text: "coolers running silently" },
-      { user: "PowerSupply", text: "main power online" },
-      { user: "BatteryBackup", text: "UPS standby ready" },
-      { user: "FinalViewer", text: "110 messages loaded! stream ready!" }
+    // Standard Live Stream Chat Log
+    const standardChatLog = [
+      { user: "Alex_99", text: "Hey everyone! Stream looking clean today." },
+      { user: "DevJake", text: "Yo! What camera resolution are we running?" },
+      { user: "Sarah_G", text: "W stream setup 🔥" },
+      { user: "PixelFan", text: "audio quality sounds super crisp" },
+      { user: "GamerTagX", text: "let's goooo" },
+      { user: "Chris_P", text: "can you switch to the next camera angle?" },
+      { user: "TechEnthusiast", text: "That HUD overlay design is really cool." },
+      { user: "VibeCheck", text: "Good afternoon chat!" },
+      { user: "Jordan_B", text: "Is the stream running at 60fps?" },
+      { user: "Maya_Z", text: "Night vision mode looks awesome!" },
+      { user: "CodeLover", text: "Vercel hosting working smoothly I see" },
+      { user: "Sam_T", text: "Hey chat! What did I miss?" }
     ];
 
-    // Populates Chat Sidebar with the 110 Pre-loaded Messages
-    function loadInitial110Messages() {
+    // Populates Chat Sidebar with standard stream messages
+    function loadNormalChat() {
       chatBox.innerHTML = '';
-      initial110Messages.forEach(msg => {
+      standardChatLog.forEach(msg => {
         const msgDiv = document.createElement('div');
         msgDiv.className = 'msg';
         msgDiv.innerHTML = `<span class="msg-user" style="color: var(--neon-cyan)">${msg.user}:</span> ${msg.text}`;
@@ -913,7 +818,7 @@
     }, 1000);
 
     // Initial Startup Procedures
-    loadInitial110Messages();
+    loadNormalChat();
     openCamModal();
   </script>
 </body>
